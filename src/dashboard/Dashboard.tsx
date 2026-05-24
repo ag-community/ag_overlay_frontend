@@ -16,7 +16,6 @@ import {
   MapPinIcon,
   SwordIcon,
   TrophyIcon,
-  UsersIcon,
 } from "@phosphor-icons/react";
 import { cn } from "~/dashboard/utils/ui";
 
@@ -397,12 +396,9 @@ export function Dashboard() {
             </Card>
 
             <Card title="Teams">
-              <div className="mb-1 flex items-center gap-2 text-[13px] text-[#b6c2e2]">
-                <UsersIcon size={16} className="text-[#ffd166]" />
-                <span className="font-bender">
-                  Configure both sides and upload square team logos.
-                </span>
-              </div>
+              <p className="text-[13px] text-[#b6c2e2] md:text-sm">
+                Configure both sides and upload square team logos.
+              </p>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <section className={teamPanelClassName}>
@@ -704,72 +700,106 @@ export function Dashboard() {
             </Card>
 
             <Card title="Scoring">
-              {/* <div className="dashboard-card-content match-settings">
-                <div>
-                  <div className="dashboard-label">Best Of</div>
-                  <div className="dashboard-counter">
-                    <button
-                      onClick={() => changeBestOf(-1)}
-                      className="dashboard-action-btn small"
-                    >
-                      -
-                    </button>
-                    <span className="dashboard-value">
-                      {settings.bestOfPoints}
-                    </span>
-                    <button
-                      onClick={() => changeBestOf(1)}
-                      className="dashboard-action-btn small"
-                    >
-                      +
-                    </button>
-                  </div>
+              <div className="flex flex-col gap-3">
+                <p className="text-[13px] text-[#b6c2e2] md:text-sm">
+                  Manage the series length and update each team score live.
+                </p>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <section className="mx-auto flex w-full max-w-72 flex-col items-center rounded-2xl border border-[#3a3f4b] bg-[#181c24]/45 p-4 text-center md:mx-0 md:max-w-none">
+                    <div className="mb-1 text-[11px] font-bender-bold uppercase tracking-[0.18em] text-[#b6c2e2]">
+                      Series
+                    </div>
+                    <div className="mb-4 text-lg font-bender-bold text-[#ffd166]">
+                      Best Of
+                    </div>
+                    <div className="flex items-center justify-center gap-5">
+                      <button
+                        type="button"
+                        onClick={() => changeBestOf(-1)}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#3a7bd5] text-xl font-bender-bold text-white transition hover:bg-[#2851a3]"
+                      >
+                        -
+                      </button>
+                      <div className="min-w-10 text-center text-[28px] font-bender-bold text-white">
+                        {settings.bestOfPoints}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => changeBestOf(1)}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#3a7bd5] text-xl font-bender-bold text-white transition hover:bg-[#2851a3]"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div className="mt-4 text-[11px] leading-4 text-[#b6c2e2]">
+                      First to {Math.ceil(settings.bestOfPoints / 2)} map wins
+                    </div>
+                  </section>
+
+                  <section className="mx-auto flex w-full max-w-72 flex-col items-center rounded-2xl border border-[#3a3f4b] bg-[#181c24]/45 p-4 text-center md:mx-0 md:max-w-none">
+                    <div className="mb-1 text-[11px] font-bender-bold uppercase tracking-[0.18em] text-[#b6c2e2]">
+                      Left Team
+                    </div>
+                    <div className="mb-4 text-lg font-bender-bold text-[#5bc0eb]">
+                      {settings.leftTeamSettings.name}
+                    </div>
+                    <div className="flex items-center justify-center gap-5">
+                      <button
+                        type="button"
+                        onClick={() => changeLeftPoints(-1)}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#3a7bd5] text-xl font-bender-bold text-white transition hover:bg-[#2851a3]"
+                      >
+                        -
+                      </button>
+                      <div className="min-w-10 text-center text-[28px] font-bender-bold text-white">
+                        {settings.leftTeamSettings.points}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => changeLeftPoints(1)}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#3a7bd5] text-xl font-bender-bold text-white transition hover:bg-[#2851a3]"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div className="mt-4 text-[11px] leading-4 text-[#b6c2e2]">
+                      Max {Math.ceil(settings.bestOfPoints / 2)} points
+                    </div>
+                  </section>
+
+                  <section className="mx-auto flex w-full max-w-72 flex-col items-center rounded-2xl border border-[#3a3f4b] bg-[#181c24]/45 p-4 text-center md:mx-0 md:max-w-none">
+                    <div className="mb-1 text-[11px] font-bender-bold uppercase tracking-[0.18em] text-[#b6c2e2]">
+                      Right Team
+                    </div>
+                    <div className="mb-4 text-lg font-bender-bold text-[#ff595e]">
+                      {settings.rightTeamSettings.name}
+                    </div>
+                    <div className="flex items-center justify-center gap-5">
+                      <button
+                        type="button"
+                        onClick={() => changeRightPoints(-1)}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#3a7bd5] text-xl font-bender-bold text-white transition hover:bg-[#2851a3]"
+                      >
+                        -
+                      </button>
+                      <div className="min-w-10 text-center text-[28px] font-bender-bold text-white">
+                        {settings.rightTeamSettings.points}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => changeRightPoints(1)}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#3a7bd5] text-xl font-bender-bold text-white transition hover:bg-[#2851a3]"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div className="mt-4 text-[11px] leading-4 text-[#b6c2e2]">
+                      Max {Math.ceil(settings.bestOfPoints / 2)} points
+                    </div>
+                  </section>
                 </div>
-                <div>
-                  <div className="dashboard-label">
-                    {settings.leftTeamSettings.name} Points
-                  </div>
-                  <div className="dashboard-counter">
-                    <button
-                      onClick={() => changeLeftPoints(-1)}
-                      className="dashboard-action-btn small"
-                    >
-                      -
-                    </button>
-                    <span className="dashboard-value">
-                      {settings.leftTeamSettings.points}
-                    </span>
-                    <button
-                      onClick={() => changeLeftPoints(1)}
-                      className="dashboard-action-btn small"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <div className="dashboard-label">
-                    {settings.rightTeamSettings.name} Points
-                  </div>
-                  <div className="dashboard-counter">
-                    <button
-                      onClick={() => changeRightPoints(-1)}
-                      className="dashboard-action-btn small"
-                    >
-                      -
-                    </button>
-                    <span className="dashboard-value">
-                      {settings.rightTeamSettings.points}
-                    </span>
-                    <button
-                      onClick={() => changeRightPoints(1)}
-                      className="dashboard-action-btn small"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              </div> */}
+              </div>
             </Card>
 
             <Card title="Background">
@@ -892,7 +922,7 @@ export function Dashboard() {
             </Card>
 
             <Card title="Server Selector">
-              {/* <div className="dashboard-card-content flex-wrap">
+              <div className="dashboard-card-content flex-wrap">
                 <SimpleBar style={{ maxHeight: 240, width: "100%" }}>
                   {AGOverlayData.map((server) => (
                     <button
@@ -911,7 +941,7 @@ export function Dashboard() {
                     </button>
                   ))}
                 </SimpleBar>
-              </div> */}
+              </div>
             </Card>
 
             <Card title="Players">
