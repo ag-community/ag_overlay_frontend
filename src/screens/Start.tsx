@@ -43,7 +43,7 @@ export function StartScreen({ from, to }: StartScreenProps) {
           <div className="start-team-name">{leftTeam.name}</div>
           <ul className="start-team-players">
             {leftTeam.players.map((player) => (
-              <li className="start-player-item" key={player.playerName}>
+              <li className="start-player-item" key={player.id}>
                 {player.flagCode && (
                   <img
                     src={getFlagUrl(player.flagCode)}
@@ -66,7 +66,7 @@ export function StartScreen({ from, to }: StartScreenProps) {
           <div className="start-team-name">{rightTeam.name}</div>
           <ul className="start-team-players">
             {rightTeam.players.map((player) => (
-              <li className="start-player-item" key={player.playerName}>
+              <li className="start-player-item" key={player.id}>
                 {player.flagCode && (
                   <img
                     src={getFlagUrl(player.flagCode)}

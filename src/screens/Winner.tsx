@@ -93,7 +93,7 @@ export function WinnerScreen({ from, to }: WinnerScreenProps) {
               <ul className="winner-players">
                 {(result === "left" ? leftTeamPlayers : rightTeamPlayers).map(
                   (player) => (
-                    <li className="winner-player-item" key={player.playerName}>
+                    <li className="winner-player-item" key={player.id}>
                       {player.flagCode && (
                         <img
                           src={getFlagUrl(player.flagCode)}

@@ -1,11 +1,28 @@
 import z from "zod";
 import { screenNameSchema } from "./screens";
 
-export const playerSchema = z.object({
+export const playerSourceSchema = z.enum(["steam", "no_steam"]);
+export type PlayerSource = z.infer<typeof playerSourceSchema>;
+
+const rawPlayerSchema = z.object({
+  id: z.string().optional(),
+  source: playerSourceSchema.optional(),
   steamID: z.string(),
   flagCode: z.string().optional(),
   playerName: z.string(),
+  avatarUrl: z.string().optional(),
 });
+
+export const playerSchema = rawPlayerSchema.transform((player) => ({
+  id: player.id ?? crypto.randomUUID(),
+  source:
+    player.source ??
+    (player.steamID.trim().toUpperCase() === "NO_STEAM" ? "no_steam" : "steam"),
+  steamID: player.steamID,
+  flagCode: player.flagCode,
+  playerName: player.playerName,
+  avatarUrl: player.avatarUrl ?? "",
+}));
 
 export type Player = z.infer<typeof playerSchema>;
 
