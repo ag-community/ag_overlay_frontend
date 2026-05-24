@@ -2,11 +2,23 @@ import { produce } from "immer";
 import { screenNames, type ScreenName } from "~/schemas/screens";
 import { useAGOverlay } from "~/state/ag_overlay";
 import { useSettings } from "~/state/dashboard";
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import SimpleBar from "simplebar-react";
 import "simplebar/dist/simplebar.min.css";
 import "./dashboard.css";
 import { ALPHA2_COUNTRY_LIST, getFlagUrl } from "~/utils/countries";
+import Card from "./components/Card";
+import {
+  CaretDownIcon,
+  FlagPennantIcon,
+  HourglassIcon,
+  ListIcon,
+  MapPinIcon,
+  SwordIcon,
+  TrophyIcon,
+  UsersIcon,
+} from "@phosphor-icons/react";
+import { cn } from "~/dashboard/utils/ui";
 
 const sidebarItems = [
   { label: "Dashboard", anchor: "dashboard" },
@@ -257,24 +269,67 @@ export function Dashboard() {
       <main className="dashboard-main">
         {selectedSection === "dashboard" && (
           <>
-            <section className="dashboard-card" id="scene-switcher">
-              <div className="dashboard-card-title">Scene Switcher</div>
-              <div className="dashboard-card-content flex-wrap">
-                {screenNames.map((scene) => (
-                  <button
-                    key={scene}
-                    className={`dashboard-action-btn ${settings.activeScreen === scene ? "active" : ""}`}
-                    onClick={() => setSelectedScreen(scene)}
-                  >
-                    {scene}
-                  </button>
-                ))}
-              </div>
-            </section>
+            <Card title="Scene Switcher">
+              <div className="flex min-w-0 flex-1 flex-col gap-3">
+                <div className="md:hidden">
+                  <div className="relative">
+                    <select
+                      value={settings.activeScreen}
+                      onChange={(e) =>
+                        setSelectedScreen(e.target.value as ScreenName)
+                      }
+                      className="w-full appearance-none rounded-xl border border-[#3a7bd5]/45 bg-[#181c24] px-4 py-3 pr-12 text-[14px] font-bender-bold uppercase tracking-[0.06em] text-white shadow-[0_8px_24px_rgba(0,0,0,0.18)] outline-none transition focus:border-[#ffd166] focus:ring-2 focus:ring-[#3a7bd5]/35 cursor-pointer"
+                    >
+                      {screenNames.map((scene) => (
+                        <option key={scene} value={scene}>
+                          {scene}
+                        </option>
+                      ))}
+                    </select>
+                    <CaretDownIcon
+                      size={20}
+                      weight="bold"
+                      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#ffd166]"
+                    />
+                  </div>
+                </div>
 
-            <section className="dashboard-card" id="tournament">
-              <div className="dashboard-card-title">Tournament Settings</div>
-              <div className="dashboard-card-content match-settings">
+                <div className="hidden flex-wrap gap-2 md:flex">
+                  {screenNames.map((scene) => (
+                    <button
+                      key={scene}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-lg bg-[#3a7bd5] px-4 py-2 text-[13px] uppercase text-white transition-all hover:bg-[#2a6bc5] hover:text-gray-200",
+                        "font-bender-bold shadow-[0_8px_18px_rgba(42,107,197,0.18)] cursor-pointer",
+                        settings.activeScreen === scene &&
+                          "bg-[#ffd166] text-[#23293a] shadow-[0_8px_18px_rgba(255,209,102,0.2)] hover:bg-[#ffd166] hover:text-[#23293a]",
+                      )}
+                      onClick={() => setSelectedScreen(scene)}
+                    >
+                      {scene === "start" && (
+                        <FlagPennantIcon size={18} weight="bold" />
+                      )}
+                      {scene === "standby" && (
+                        <HourglassIcon size={18} weight="bold" />
+                      )}
+                      {scene === "versus" && (
+                        <SwordIcon size={18} weight="bold" />
+                      )}
+                      {scene === "mappool" && (
+                        <ListIcon size={18} weight="bold" />
+                      )}
+                      {scene === "winner" && (
+                        <TrophyIcon size={18} weight="bold" />
+                      )}
+                      {scene}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </Card>
+
+            <Card title="Tournament Settings">
+              {/* <div className="dashboard-card-content match-settings">
                 <div>
                   <div className="dashboard-label">Tournament Name</div>
                   <input
@@ -549,12 +604,11 @@ export function Dashboard() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </section>
+              </div> */}
+            </Card>
 
-            <section className="dashboard-card" id="scoring">
-              <div className="dashboard-card-title">Scoring</div>
-              <div className="dashboard-card-content match-settings">
+            <Card title="Scoring">
+              {/* <div className="dashboard-card-content match-settings">
                 <div>
                   <div className="dashboard-label">Best Of</div>
                   <div className="dashboard-counter">
@@ -619,12 +673,11 @@ export function Dashboard() {
                     </button>
                   </div>
                 </div>
-              </div>
-            </section>
+              </div> */}
+            </Card>
 
-            <section className="dashboard-card" id="background">
-              <div className="dashboard-card-title">Background</div>
-              <div
+            <Card title="Background">
+              {/* <div
                 className="dashboard-card-content flex-wrap"
                 style={{ alignItems: "flex-start" }}
               >
@@ -739,12 +792,11 @@ export function Dashboard() {
                     />
                   </div>
                 </div>
-              </div>
-            </section>
+              </div> */}
+            </Card>
 
-            <section className="dashboard-card" id="server-selector">
-              <div className="dashboard-card-title">Server Selector</div>
-              <div className="dashboard-card-content flex-wrap">
+            <Card title="Server Selector">
+              {/* <div className="dashboard-card-content flex-wrap">
                 <SimpleBar style={{ maxHeight: 240, width: "100%" }}>
                   {AGOverlayData.map((server) => (
                     <button
@@ -763,12 +815,11 @@ export function Dashboard() {
                     </button>
                   ))}
                 </SimpleBar>
-              </div>
-            </section>
+              </div> */}
+            </Card>
 
-            <section className="dashboard-card" id="players-settings">
-              <div className="dashboard-card-title">Players</div>
-              <div className="dashboard-card-content flex-wrap players-section">
+            <Card title="Players">
+              {/* <div className="dashboard-card-content flex-wrap players-section">
                 <div className="team-players">
                   <div className="dashboard-label" style={{ color: "#5bc0eb" }}>
                     Left Side
@@ -946,15 +997,14 @@ export function Dashboard() {
                     ))}
                   </ul>
                 </div>
-              </div>
-            </section>
+              </div> */}
+            </Card>
           </>
         )}
 
         {selectedSection === "settings" && (
-          <section className="dashboard-card" id="settings">
-            <div className="dashboard-card-title">Connection Settings</div>
-            <div className="dashboard-card-content">
+          <Card title="Connection Settings">
+            {/* <div className="dashboard-card-content">
               <div>
                 <div className="dashboard-label">WebSocket URL</div>
                 <input
@@ -964,8 +1014,8 @@ export function Dashboard() {
                   onChange={changeWebsocketURL}
                 />
               </div>
-            </div>
-          </section>
+            </div> */}
+          </Card>
         )}
       </main>
     </div>
