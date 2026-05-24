@@ -1,0 +1,21 @@
+
+
+// Overview: Zoom 2.80, Map Origin (-616.00, 904.00, -352.00), Z Min 65.00, Z Max -769.00, Rotated 0
+
+
+
+
+// overview description file for echo.bsp
+
+global 
+{
+	ZOOM	2.80
+	ORIGIN	-616.00 904.00 -352.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/echo.bmp"
+	HEIGHT	-352.00
+}

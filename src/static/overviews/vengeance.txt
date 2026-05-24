@@ -1,0 +1,18 @@
+
+
+// Overview: Zoom 1.39, Map Origin (520.00, 672.00, 302.00), Z Min 685.00, Z Max -81.00, Rotated 1
+
+// overview description file for vengeance.bsp
+
+global 
+{
+	ZOOM	1.39
+	ORIGIN	520.00 672.00 302.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/vengeance.bmp"
+	HEIGHT	302.00
+}

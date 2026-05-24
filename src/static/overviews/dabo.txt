@@ -1,0 +1,20 @@
+
+// Overview: Zoom 1.87, Map Origin (-922.00, 229.00, -790.50), Z Min 709.00, Z Max -2290.00, Rotated 1
+
+
+
+
+// overview description file for dabo.bsp
+
+global 
+{
+	ZOOM	1.87
+	ORIGIN	-922.00 229.00 -790.50
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/dabo.bmp"
+	HEIGHT	-2290.00
+}

@@ -1,0 +1,20 @@
+
+// Overview: Zoom 2.56, Map Origin (-568.00, -96.00, 64.00), Z Min 449.00, Z Max -321.00, Rotated 0
+
+
+
+
+// overview description file for farewell.bsp
+
+global 
+{
+	ZOOM	2.56
+	ORIGIN	-568.00 -96.00 64.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/farewell.bmp"
+	HEIGHT 64.00
+}

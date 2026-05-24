@@ -1,0 +1,20 @@
+
+// Overview: Zoom 2.36, Map Origin (-296.00, -64.00, 320.00), Z Min 1025.00, Z Max -385.00, Rotated 1
+
+
+
+
+// overview description file for cyanidestalkyard.bsp
+
+global 
+{
+	ZOOM	2.36
+	ORIGIN	-296.00 -64.00	320.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/cyanidestalkyard.bmp"
+	HEIGHT	320.00
+}

@@ -1,0 +1,20 @@
+
+// Overview: Zoom 2.11, Map Origin (320.00, -384.00, 172.00), Z Min 577.00, Z Max -233.00, Rotated 1
+
+
+
+
+// overview description file for cold_faces.bsp
+
+global 
+{
+	ZOOM	2.11
+	ORIGIN	320.00, -384.00, 172.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/cold_faces.bmp"
+	HEIGHT	-233.00
+}

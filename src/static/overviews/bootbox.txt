@@ -1,0 +1,20 @@
+
+// Overview: Zoom 2.43, Map Origin (1280.00, 1280.00, 1024.00), Z Min 2033.00, Z Max 15.00, Rotated 1
+
+
+
+
+// overview description file for bootbox.bsp
+
+global 
+{
+	ZOOM	2.43
+	ORIGIN	1280.00 1280.00 1024.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/bootbox.bmp"
+	HEIGHT	15.00
+}

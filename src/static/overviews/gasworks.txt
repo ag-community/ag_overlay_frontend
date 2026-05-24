@@ -1,0 +1,17 @@
+// Overview: Zoom 2.59, Map Origin (-236.00, 348.00, -128.00), Z Min 1313.00, Z Max -1569.00, Rotated 0
+
+
+// overview description file for gasworks.bsp
+
+global 
+{
+	ZOOM	2.59
+	ORIGIN	-236.00 348.00 -128.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/gasworks.bmp"
+	HEIGHT	-128.00
+}

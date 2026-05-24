@@ -1,0 +1,19 @@
+
+
+// Overview: Zoom 1.71, Map Origin (1032.00, -299.81, -276.00), Z Min 105.00, Z Max -657.00, Rotated 0
+
+
+// overview description file for Urethane.bsp
+
+global 
+{
+	ZOOM	1.71
+	ORIGIN	1032.00 -299.81 -276.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/Urethane.bmp"
+	HEIGHT	-276.00
+}

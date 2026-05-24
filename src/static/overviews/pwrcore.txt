@@ -1,0 +1,20 @@
+
+
+// Overview: Zoom 3.25, Map Origin (-15.94, 133.06, -144.00), Z Min 65.00, Z Max -353.00, Rotated 0
+
+
+
+// overview description file forpwrcore.bsp
+
+global 
+{
+	ZOOM	3.25
+	ORIGIN	-15.94 133.06 -144.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/pwrcore.bmp"
+	HEIGHT	-144.00
+}

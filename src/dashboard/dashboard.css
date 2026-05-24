@@ -1,0 +1,318 @@
+@font-face {
+  font-family: "BenderBlack";
+  src: url("../static/fonts/Bender-Black.otf");
+}
+@font-face {
+  font-family: "BenderBold";
+  src: url("../static/fonts/Bender-Bold.otf");
+}
+@font-face {
+  font-family: "BenderRegular";
+  src: url("../static/fonts/Bender-Regular.otf");
+}
+
+body,
+html {
+  padding: 0;
+  margin: 0;
+  height: 100dvh;
+  background-color: #181c24;
+  scrollbar-width: thin;
+  scrollbar-color: #23293a #3a7bd5;
+  font-size: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  height: 100%;
+}
+
+p {
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-root {
+  display: flex;
+  min-height: 100dvh;
+  background: #181c24;
+}
+
+.dashboard-sidebar {
+  background: #23293a;
+  min-width: 200px;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 0;
+  border-radius: 0 24px 24px 0;
+  align-items: stretch;
+}
+
+.sidebar-btn {
+  background: #23293a;
+  color: #fff;
+  font-family: "BenderBold", sans-serif;
+  font-size: 20px;
+  border: none;
+  border-radius: 0 24px 24px 0;
+  padding: 18px 0 18px 32px;
+  text-align: left;
+  margin-right: 12px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+  text-decoration: none;
+  display: block;
+}
+
+.sidebar-btn:hover {
+  background: #2851a3;
+  color: #ffd166;
+}
+
+.sidebar-btn.active {
+  background: #3a7bd5;
+  color: #ffd166;
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 32px 24px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+
+.dashboard-card {
+  background: #23293a;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px #0002;
+  padding: 24px 32px;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dashboard-card-title {
+  font-size: 22px;
+  font-family: "BenderBold", sans-serif;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.dashboard-card-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 18px;
+  color: #b6c2e2;
+}
+
+.dashboard-card-content.flex-wrap {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dashboard-action-btn {
+  background: #3a7bd5;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 16px;
+  font-family: "BenderBold", sans-serif;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+  margin-bottom: 6px;
+}
+
+.dashboard-action-btn.active,
+.dashboard-action-btn:hover {
+  background: #2851a3;
+  color: #ffd166;
+}
+
+.dashboard-action-btn.small {
+  padding: 4px 12px;
+  font-size: 18px;
+  margin: 0 4px;
+}
+
+.dashboard-label {
+  font-size: 16px;
+  color: #ffd166;
+  margin-bottom: 4px;
+  font-family: "BenderBold", sans-serif;
+}
+
+.dashboard-counter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dashboard-value {
+  min-width: 28px;
+  text-align: center;
+  font-size: 20px;
+  font-family: "BenderBold", sans-serif;
+  color: #fff;
+  margin: 0 8px;
+}
+
+.dashboard-input {
+  min-width: 180px;
+  width: 100%;
+  max-width: 320px;
+  font-size: 16px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  background: #181c24;
+  color: #fff;
+  font-family: "BenderRegular", sans-serif;
+  box-sizing: border-box;
+}
+
+.match-settings {
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.simplebar-scrollbar::before {
+  background: #3a7bd5 !important;
+}
+
+.simplebar-track.simplebar-vertical {
+  width: 8px;
+}
+
+#server-selector .dashboard-card-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+#server-selector .dashboard-card-content::-webkit-scrollbar-track {
+  background: #23293a;
+  border-radius: 4px;
+}
+
+#server-selector .dashboard-card-content::-webkit-scrollbar-thumb {
+  background: #3a7bd5;
+  border-radius: 4px;
+}
+
+#tournament .dashboard-input {
+  min-width: 0;
+  max-width: none;
+}
+
+@media (max-width: 900px) {
+  .dashboard-root {
+    flex-direction: column;
+  }
+  .dashboard-sidebar {
+    flex-direction: row;
+    width: 100%;
+    min-width: 0;
+    border-radius: 0 0 24px 24px;
+    padding: 0 0 12px 0;
+    overflow-x: auto;
+    gap: 0;
+  }
+  .sidebar-btn {
+    border-radius: 0 0 24px 24px;
+    padding: 14px 18px;
+    margin: 0 4px;
+    font-size: 16px;
+    min-width: 120px;
+    text-align: center;
+  }
+  .dashboard-main {
+    padding: 16px 4vw;
+    align-items: center;
+  }
+  .dashboard-card {
+    max-width: 100%;
+    padding: 16px 10px;
+  }
+}
+
+.add-player-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.player-flag {
+  display: inline-block;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px #0002;
+  margin-right: 6px;
+  vertical-align: middle;
+  width: 22px;
+  height: 16px;
+  object-fit: cover;
+}
+
+.players-section {
+  gap: 40px;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.team-players {
+  min-width: 220px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.players-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px 0;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.players-section {
+  gap: 40px;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.team-players {
+  min-width: 220px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.players-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px 0;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}

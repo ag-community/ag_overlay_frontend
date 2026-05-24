@@ -1,0 +1,19 @@
+
+
+// Overview: Zoom 2.21, Map Origin (-1045.50, -107.44, 361.50), Z Min 905.00, Z Max -182.00, Rotated 0
+
+
+// overview description file for olvidada_Muerte.bsp
+
+global 
+{
+	ZOOM	2.21
+	ORIGIN	-1045.50 -107.44 361.50
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/olvidada_Muerte.bmp"
+	HEIGHT	361.50
+}

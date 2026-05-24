@@ -1,0 +1,20 @@
+
+
+// Overview: Zoom 1.99, Map Origin (-1038.00, -109.00, 240.00), Z Min 1057.00, Z Max -577.00, Rotated 1
+
+
+
+// overview description file for undyz.bsp
+
+global 
+{
+	ZOOM	1.99
+	ORIGIN	-1038.00 -109.00 240.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/undyz.bmp"
+	HEIGHT	240.00
+}

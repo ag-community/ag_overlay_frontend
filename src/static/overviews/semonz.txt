@@ -1,0 +1,20 @@
+
+// Overview: Zoom 1.64, Map Origin (880.00, 1152.00, -20.00), Z Min 257.00, Z Max -297.00, Rotated 0
+
+
+
+
+// overview description file for semonz.bsp
+
+global 
+{
+	ZOOM	1.64
+	ORIGIN	880.00 1152.00 -20.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/semonz.bmp"
+	HEIGHT	-297.00
+}

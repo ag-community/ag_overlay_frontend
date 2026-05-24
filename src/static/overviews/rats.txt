@@ -1,0 +1,20 @@
+
+// Overview: Zoom 3.69, Map Origin (-320.00, 64.00, 605.00), Z Min 1217.00, Z Max -7.00, Rotated 0
+
+
+
+
+// overview description file for rats.bsp
+
+global 
+{
+	ZOOM	3.69
+	ORIGIN	-320.00 64.00 605.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/rats.bmp"
+	HEIGHT	-7.00
+}

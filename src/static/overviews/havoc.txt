@@ -1,0 +1,18 @@
+
+// Overview: Zoom 1.92, Map Origin (168.00, 112.00, -630.00), Z Min 37.00, Z Max -1297.00, Rotated 1
+
+
+// overview description file for havoc.bsp
+
+global 
+{
+	ZOOM	1.92
+	ORIGIN	168.00 112.00 -630.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/havoc.bmp"
+	HEIGHT	-630.00
+}

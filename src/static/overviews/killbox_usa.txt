@@ -1,0 +1,19 @@
+
+
+// Overview: Zoom 3.02, Map Origin (328.00, -744.00, 864.00), Z Min 1921.00, Z Max -193.00, Rotated 1
+
+
+// overview description file for killbox_usa.bsp
+
+global 
+{
+	ZOOM	3.02
+	ORIGIN	328.00 -744.00 864.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/killbox_usa.bmp"
+	HEIGHT	864.00
+}

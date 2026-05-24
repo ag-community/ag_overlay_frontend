@@ -1,0 +1,16 @@
+//Overview description file fling.bsp
+//Zoom 1.86, Map Origin (304.00, 224.00, 352.00), Z Min 1025.00, Z Max -321.00, Rotated 0
+
+global 
+{
+	ZOOM	1.86
+	ORIGIN	304 224 352
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/fling.bmp"
+	HEIGHT	352
+}
+

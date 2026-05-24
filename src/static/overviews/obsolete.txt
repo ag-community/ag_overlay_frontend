@@ -1,0 +1,19 @@
+
+
+// Overview: Zoom 2.95, Map Origin (528.00, -144.00, 32.00), Z Min 577.00, Z Max -513.00, Rotated 1
+
+
+// overview description file for obsoloete.bsp
+
+global 
+{
+	ZOOM	2.95
+	ORIGIN	528.00 -144.00 32.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/obsoloete.bmp"
+	HEIGHT	32.00
+}

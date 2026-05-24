@@ -1,0 +1,20 @@
+
+
+// Overview: Zoom 2.97, Map Origin (838.00, -154.13, -304.00), Z Min 145.00, Z Max -753.00, Rotated 1
+
+
+
+// overview description file for scary_1.bsp
+
+global 
+{
+	ZOOM	2.97
+	ORIGIN	838.00 -154.13 -304.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/scary_1.bmp"
+	HEIGHT	-304.00
+}

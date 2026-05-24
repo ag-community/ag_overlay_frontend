@@ -1,0 +1,19 @@
+
+
+// Overview: Zoom 3.04, Map Origin (960.00, -320.00, 216.00), Z Min 929.00, Z Max -497.00, Rotated 1
+
+
+// overview description file for rebellion.bsp
+
+global 
+{
+	ZOOM	3.04
+	ORIGIN	960.00 -320.00 216.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/rebellion.bmp"
+	HEIGHT	216.00
+}

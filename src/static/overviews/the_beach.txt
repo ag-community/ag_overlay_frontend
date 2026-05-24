@@ -1,0 +1,20 @@
+
+
+// Overview: Zoom 1.83, Map Origin (1450.00, 581.00, 85.50), Z Min 593.00, Z Max -422.00, Rotated 1
+
+
+
+// overview description file for the_beach.bsp
+
+global 
+{
+	ZOOM	1.83
+	ORIGIN	1450.00 581.00 85.50
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/the_beach.bmp"
+	HEIGHT	85.50
+}

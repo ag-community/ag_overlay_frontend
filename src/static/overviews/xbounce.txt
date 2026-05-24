@@ -1,0 +1,19 @@
+
+
+// Overview: Zoom 2.93, Map Origin (112.00, -504.00, 64.00), Z Min 561.00, Z Max -433.00, Rotated 1
+
+
+// overview description file for xbounce.bsp
+
+global 
+{
+	ZOOM	2.93
+	ORIGIN	112.00 -504.00 64.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/xbounce.bmp"
+	HEIGHT	64.00
+}

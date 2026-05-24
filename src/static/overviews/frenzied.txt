@@ -1,0 +1,21 @@
+
+
+// Overview: Zoom 2.26, Map Origin (464.00, 168.38, -184.00), Z Min 401.00, Z Max -769.00, Rotated 0
+
+
+
+
+// overview description file for frenzied.bsp
+
+global 
+{
+	ZOOM	2.26
+	ORIGIN	464.00 168.38 -184.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/frenzied.bmp"
+	HEIGHT	-184.00
+}

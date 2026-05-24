@@ -1,0 +1,17 @@
+
+// Overview: Zoom 1.30, Map Origin (480.00, 192.00, 48.00), Z Min 433.00, Z Max -337.00, Rotated 1
+
+// overview description file for ag_hidden_lab.bsp
+
+global 
+{
+	ZOOM	1.30
+	ORIGIN	480.00 192.00 48.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/ag_hidden_lab.bmp"
+	HEIGHT	48.00
+}

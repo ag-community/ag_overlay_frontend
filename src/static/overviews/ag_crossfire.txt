@@ -1,0 +1,20 @@
+
+// Overview: Zoom 2.00, Map Origin (-64.00, -327.00, -929.50), Z Min -2.00, Z Max -1857.00, Rotated 0
+
+
+
+
+// overview description file for ag_crossfire.bsp
+
+global 
+{
+	ZOOM	2.00
+	ORIGIN	-64.00 	-327.00	-929.50
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/ag_crossfire.bmp"
+	HEIGHT	-929.50
+}

@@ -1,0 +1,19 @@
+// Overview: Zoom 2.60, Map Origin (70.50, -633.44, 180.00), Z Min 873.00, Z Max -513.00, Rotated 0
+
+
+
+
+// overview description file for isotonic.bsp
+
+global 
+{
+	ZOOM	2.60
+	ORIGIN	70.50 	-633.44	180.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/isotonic.bmp"
+	HEIGHT	180.00
+}

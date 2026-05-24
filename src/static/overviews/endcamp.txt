@@ -1,0 +1,19 @@
+
+// Overview: Zoom 2.03, Map Origin (-1489.50, 720.00, 57.00), Z Min 275.00, Z Max -161.00, Rotated 0
+
+
+
+// overview description file for endcamp.bsp
+
+global 
+{
+	ZOOM	2.03
+	ORIGIN	-1489.50 720.00 57.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/endcamp.bmp"
+	HEIGHT	57.00
+}

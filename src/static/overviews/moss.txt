@@ -1,0 +1,18 @@
+
+
+// Overview: Zoom 1.40, Map Origin (424.00, -688.00, 960.00), Z Min 1665.00, Z Max 255.00, Rotated 1
+
+// overview description file for moss.bsp
+
+global 
+{
+	ZOOM	1.40
+	ORIGIN	424.00 -688.00 960.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/moss.bmp"
+	HEIGHT	960.00
+}

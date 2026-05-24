@@ -1,0 +1,20 @@
+
+// Overview: Zoom 1.03, Map Origin (960.00, 944.00, 288.00), Z Min 2209.00, Z Max -1633.00, Rotated
+
+
+
+
+// overview description file for eden.bsp
+
+global 
+{
+	ZOOM	1.03
+	ORIGIN	960.00 944.00 288.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/eden.bmp"
+	HEIGHT	-1633.00
+}

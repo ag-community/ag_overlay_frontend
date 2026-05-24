@@ -1,0 +1,19 @@
+
+
+// Overview: Zoom 1.20, Map Origin (512.00, -161.06, -512.00), Z Min 769.00, Z Max -1793.00, Rotated 1
+
+
+// overview description file for homeworld.bsp
+
+global 
+{
+	ZOOM	1.20
+	ORIGIN	512.00 -161.06 -512.00
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/homeworld.bmp"
+	HEIGHT	-512.00
+}

@@ -1,0 +1,21 @@
+
+
+// Overview: Zoom 2.33, Map Origin (32.00, -40.00, -128.00), Z Min 417.00, Z Max -673.00, Rotated 0
+
+
+
+
+// overview description file for darn.bsp
+
+global 
+{
+	ZOOM	2.33
+	ORIGIN	32.00 	-40.00	-128.00
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/darn.bmp"
+	HEIGHT	-128.00
+}

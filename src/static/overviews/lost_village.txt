@@ -1,0 +1,19 @@
+
+
+// Overview: Zoom 2.23, Map Origin (216.00, -180.88, -40.00), Z Min 161.00, Z Max -241.00, Rotated 1
+
+
+// overview description file for lost_village.bsp
+
+global 
+{
+	ZOOM	2.23
+	ORIGIN	216.00 -180.88 -40.0
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/lost_village.bmp"
+	HEIGHT	-40.0
+}

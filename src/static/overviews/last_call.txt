@@ -1,0 +1,18 @@
+
+// Overview: Zoom 1.57, Map Origin (-304.00, -24.00, 802.50), Z Min 2145.00, Z Max -540.00, Rotated 0
+
+
+// overview description file for last_call.bsp
+
+global 
+{
+	ZOOM	1.57
+	ORIGIN	-304.00 -24.00 802.50
+	ROTATED	0
+}
+
+layer 
+{
+	IMAGE	"overviews/last_call.bmp"
+	HEIGHT	-540.00
+}

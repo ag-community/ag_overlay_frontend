@@ -1,0 +1,18 @@
+
+//Overview: Zoom 2.08, Map Origin (406.00, 393.94, -80.00), Z Min 545.00, Z Max -705.00, Rotated 1
+
+
+// overview description file for elixir.bsp
+
+global 
+{
+	ZOOM	2.08
+	ORIGIN	406	393.94	-80
+	ROTATED	1
+}
+
+layer 
+{
+	IMAGE	"overviews/elixir.bmp"
+	HEIGHT	-80
+}
