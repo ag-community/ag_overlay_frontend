@@ -25,6 +25,23 @@ const sidebarItems = [
   { label: "Settings", anchor: "settings" },
 ];
 
+const teamModelPresets = ["blue", "red"] as const;
+
+const dashboardFieldLabelClassName =
+  "mb-2 block text-[13px] font-bender-bold uppercase tracking-[0.08em] text-[#ffd166]";
+
+const dashboardInputClassName =
+  "w-full rounded-xl border border-[#3a3f4b] bg-[#181c24] px-4 py-3 text-[15px] text-white outline-none transition placeholder:text-[#7481a1] focus:border-[#3a7bd5] focus:ring-2 focus:ring-[#3a7bd5]/25";
+
+const teamPanelClassName =
+  "rounded-2xl border border-[#3a3f4b] bg-[#181c24]/45 p-4 md:p-5";
+
+function isPresetTeamModel(model: string) {
+  return teamModelPresets.includes(
+    model.trim().toLowerCase() as (typeof teamModelPresets)[number],
+  );
+}
+
 export function Dashboard() {
   const AGOverlayData = useAGOverlay();
   const [settings, setSettings] = useSettings();
@@ -180,6 +197,15 @@ export function Dashboard() {
     );
   };
 
+  const changeTeamName = (side: "left" | "right", value: string) => {
+    setSettings(
+      produce((settings) => {
+        if (side === "left") settings.leftTeamSettings.name = value;
+        else settings.rightTeamSettings.name = value;
+      }),
+    );
+  };
+
   const changeWebsocketURL = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSettings(
       produce((settings) => {
@@ -198,6 +224,11 @@ export function Dashboard() {
     flagCode: "",
     playerName: "",
   });
+
+  const leftModelIsPreset = isPresetTeamModel(settings.leftTeamSettings.model);
+  const rightModelIsPreset = isPresetTeamModel(
+    settings.rightTeamSettings.model,
+  );
 
   const addLeftPlayer = () => {
     if (
@@ -329,282 +360,347 @@ export function Dashboard() {
             </Card>
 
             <Card title="Tournament Settings">
-              {/* <div className="dashboard-card-content match-settings">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <div className="dashboard-label">Tournament Name</div>
+                  <label
+                    htmlFor="tournament-name"
+                    className={dashboardFieldLabelClassName}
+                  >
+                    Tournament Name
+                  </label>
                   <input
+                    id="tournament-name"
                     type="text"
-                    className="dashboard-input"
+                    className={dashboardInputClassName}
                     value={settings.tournamentName}
                     onChange={changeTournamentName}
-                    style={{
-                      minWidth: 180,
-                      fontSize: 16,
-                      padding: "6px 10px",
-                      borderRadius: 6,
-                      border: "none",
-                      background: "#181c24",
-                      color: "#fff",
-                      fontFamily: "BenderRegular, sans-serif",
-                    }}
+                    placeholder="Adrenaline Gamer Open"
                   />
                 </div>
                 <div>
-                  <div className="dashboard-label">Round Name</div>
+                  <label
+                    htmlFor="round-name"
+                    className={dashboardFieldLabelClassName}
+                  >
+                    Round Name
+                  </label>
                   <input
+                    id="round-name"
                     type="text"
-                    className="dashboard-input"
+                    className={dashboardInputClassName}
                     value={settings.round}
                     onChange={changeRound}
-                    style={{
-                      minWidth: 180,
-                      fontSize: 16,
-                      padding: "6px 10px",
-                      borderRadius: 6,
-                      border: "none",
-                      background: "#181c24",
-                      color: "#fff",
-                      fontFamily: "BenderRegular, sans-serif",
-                    }}
+                    placeholder="Semifinal"
                   />
                 </div>
               </div>
-              <div
-                className="match-settings"
-                style={{
-                  borderTop: "1px solid #3a3f4b",
-                  paddingTop: 16,
-                  marginTop: 8,
-                }}
-              >
-                <div
-                  className="dashboard-card-title"
-                  style={{ fontSize: 16, marginBottom: 8 }}
-                >
-                  Teams
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 32,
-                    flexWrap: "wrap",
-                    width: "100%",
-                  }}
-                >
-                  <div
-                    style={{
-                      flex: "1 1 260px",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 8,
-                    }}
-                  >
-                    <div
-                      className="dashboard-label"
-                      style={{ color: "#5bc0eb" }}
-                    >
-                      Left Side
-                    </div>
+            </Card>
+
+            <Card title="Teams">
+              <div className="mb-1 flex items-center gap-2 text-[13px] text-[#b6c2e2]">
+                <UsersIcon size={16} className="text-[#ffd166]" />
+                <span className="font-bender">
+                  Configure both sides and upload square team logos.
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <section className={teamPanelClassName}>
+                  <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
-                      <div className="dashboard-label" style={{ fontSize: 13 }}>
-                        Team Name
-                      </div>
-                      <input
-                        type="text"
-                        className="dashboard-input"
-                        value={settings.leftTeamSettings.name}
-                        onChange={(e) =>
-                          setSettings(
-                            produce((s) => {
-                              s.leftTeamSettings.name = e.target.value;
-                            }),
-                          )
-                        }
-                        style={{
-                          padding: "4px 8px",
-                          fontSize: 14,
-                          maxWidth: "100%",
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <div className="dashboard-label" style={{ fontSize: 13 }}>
-                        Model
-                      </div>
-                      <input
-                        type="text"
-                        className="dashboard-input"
-                        value={settings.leftTeamSettings.model}
-                        onChange={(e) =>
-                          changeTeamModel("left", e.target.value)
-                        }
-                        style={{
-                          padding: "4px 8px",
-                          fontSize: 14,
-                          maxWidth: "100%",
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <div className="dashboard-label" style={{ fontSize: 13 }}>
-                        Logo
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                        }}
-                      >
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleLogoUpload("left", e)}
-                          className="dashboard-input"
-                          style={{
-                            padding: "4px 8px",
-                            fontSize: 14,
-                            maxWidth: "100%",
-                          }}
-                        />
-                        {settings.leftTeamLogoUrl && (
-                          <>
-                            <span
-                              style={{
-                                fontSize: 12,
-                                color: "#b6c2e2",
-                                fontFamily: "monospace",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                                maxWidth: 80,
-                              }}
-                            >
-                              {settings.leftTeamLogoUrl.split("/").pop()}
-                            </span>
-                            <button
-                              onClick={() => removeLogo("left")}
-                              className="dashboard-action-btn small"
-                              style={{
-                                background: "#d32f2f",
-                                padding: "2px 6px",
-                              }}
-                            >
-                              ✕
-                            </button>
-                          </>
-                        )}
+                      <div className="mt-1 text-lg font-bender-bold text-[#5bc0eb]">
+                        Team A
                       </div>
                     </div>
                   </div>
-                  <div
-                    style={{
-                      flex: "1 1 260px",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 8,
-                    }}
-                  >
-                    <div
-                      className="dashboard-label"
-                      style={{ color: "#ff595e" }}
-                    >
-                      Right Side
-                    </div>
+
+                  <div className="space-y-4">
                     <div>
-                      <div className="dashboard-label" style={{ fontSize: 13 }}>
+                      <label
+                        htmlFor="left-team-name"
+                        className={dashboardFieldLabelClassName}
+                      >
                         Team Name
-                      </div>
+                      </label>
                       <input
+                        id="left-team-name"
                         type="text"
-                        className="dashboard-input"
+                        className={dashboardInputClassName}
+                        value={settings.leftTeamSettings.name}
+                        onChange={(e) => changeTeamName("left", e.target.value)}
+                        placeholder="Blue Phoenix"
+                      />
+                    </div>
+
+                    <div>
+                      <label className={dashboardFieldLabelClassName}>
+                        Model
+                      </label>
+                      <div className="mb-3 grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          className={cn(
+                            "rounded-xl border px-3 py-2 text-[13px] font-bender-bold uppercase tracking-[0.08em] transition",
+                            settings.leftTeamSettings.model
+                              .trim()
+                              .toLowerCase() === "blue"
+                              ? "border-[#5bc0eb] bg-[#3a7bd5] text-white"
+                              : "border-[#3a3f4b] bg-[#181c24] text-[#b6c2e2] hover:border-[#3a7bd5] hover:text-white",
+                          )}
+                          onClick={() => changeTeamModel("left", "blue")}
+                        >
+                          Blue
+                        </button>
+                        <button
+                          type="button"
+                          className={cn(
+                            "rounded-xl border px-3 py-2 text-[13px] font-bender-bold uppercase tracking-[0.08em] transition",
+                            settings.leftTeamSettings.model
+                              .trim()
+                              .toLowerCase() === "red"
+                              ? "border-[#ff595e] bg-[#ff595e] text-white"
+                              : "border-[#3a3f4b] bg-[#181c24] text-[#b6c2e2] hover:border-[#ff595e] hover:text-white",
+                          )}
+                          onClick={() => changeTeamModel("left", "red")}
+                        >
+                          Red
+                        </button>
+                        <button
+                          type="button"
+                          className={cn(
+                            "rounded-xl border px-3 py-2 text-[13px] font-bender-bold uppercase tracking-[0.08em] transition",
+                            !leftModelIsPreset
+                              ? "border-[#ffd166] bg-[#ffd166] text-[#23293a]"
+                              : "border-[#3a3f4b] bg-[#181c24] text-[#b6c2e2] hover:border-[#ffd166] hover:text-white",
+                          )}
+                          onClick={() =>
+                            changeTeamModel(
+                              "left",
+                              leftModelIsPreset
+                                ? ""
+                                : settings.leftTeamSettings.model,
+                            )
+                          }
+                        >
+                          Other
+                        </button>
+                      </div>
+                      {!leftModelIsPreset && (
+                        <input
+                          type="text"
+                          className={dashboardInputClassName}
+                          value={settings.leftTeamSettings.model}
+                          onChange={(e) =>
+                            changeTeamModel("left", e.target.value)
+                          }
+                          placeholder="Zombie"
+                        />
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <label className={dashboardFieldLabelClassName}>
+                          Logo
+                        </label>
+                        <span className="text-[11px] text-[#b6c2e2]">
+                          Square image, max 256x256px
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                        <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-[#3a3f4b] bg-[#181c24]">
+                          {settings.leftTeamLogoUrl ? (
+                            <img
+                              src={settings.leftTeamLogoUrl}
+                              alt="Left team logo preview"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-center text-[11px] font-bender-bold uppercase tracking-[0.12em] text-[#7481a1]">
+                              No Logo
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex min-w-0 flex-1 flex-col gap-2">
+                          <input
+                            id="left-team-logo"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleLogoUpload("left", e)}
+                            className="hidden"
+                          />
+                          <label
+                            htmlFor="left-team-logo"
+                            className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-[#3a7bd5] px-4 py-3 text-center text-[13px] font-bender-bold uppercase tracking-[0.08em] text-white transition hover:bg-[#2851a3]"
+                          >
+                            Upload Logo
+                          </label>
+                          {settings.leftTeamLogoUrl && (
+                            <button
+                              type="button"
+                              onClick={() => removeLogo("left")}
+                              className="inline-flex w-fit items-center justify-center rounded-xl bg-[#d32f2f] px-3 py-2 text-[12px] font-bender-bold uppercase tracking-[0.08em] text-white transition hover:bg-[#b72828]"
+                            >
+                              Delete Logo
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section className={teamPanelClassName}>
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div>
+                      <div className="mt-1 text-lg font-bender-bold text-[#ff595e]">
+                        Team B
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label
+                        htmlFor="right-team-name"
+                        className={dashboardFieldLabelClassName}
+                      >
+                        Team Name
+                      </label>
+                      <input
+                        id="right-team-name"
+                        type="text"
+                        className={dashboardInputClassName}
                         value={settings.rightTeamSettings.name}
                         onChange={(e) =>
-                          setSettings(
-                            produce((s) => {
-                              s.rightTeamSettings.name = e.target.value;
-                            }),
-                          )
+                          changeTeamName("right", e.target.value)
                         }
-                        style={{
-                          padding: "4px 8px",
-                          fontSize: 14,
-                          maxWidth: "100%",
-                        }}
+                        placeholder="Red Horizon"
                       />
                     </div>
+
                     <div>
-                      <div className="dashboard-label" style={{ fontSize: 13 }}>
+                      <label className={dashboardFieldLabelClassName}>
                         Model
+                      </label>
+                      <div className="mb-3 grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          className={cn(
+                            "rounded-xl border px-3 py-2 text-[13px] font-bender-bold uppercase tracking-[0.08em] transition",
+                            settings.rightTeamSettings.model
+                              .trim()
+                              .toLowerCase() === "blue"
+                              ? "border-[#5bc0eb] bg-[#3a7bd5] text-white"
+                              : "border-[#3a3f4b] bg-[#181c24] text-[#b6c2e2] hover:border-[#3a7bd5] hover:text-white",
+                          )}
+                          onClick={() => changeTeamModel("right", "blue")}
+                        >
+                          Blue
+                        </button>
+                        <button
+                          type="button"
+                          className={cn(
+                            "rounded-xl border px-3 py-2 text-[13px] font-bender-bold uppercase tracking-[0.08em] transition",
+                            settings.rightTeamSettings.model
+                              .trim()
+                              .toLowerCase() === "red"
+                              ? "border-[#ff595e] bg-[#ff595e] text-white"
+                              : "border-[#3a3f4b] bg-[#181c24] text-[#b6c2e2] hover:border-[#ff595e] hover:text-white",
+                          )}
+                          onClick={() => changeTeamModel("right", "red")}
+                        >
+                          Red
+                        </button>
+                        <button
+                          type="button"
+                          className={cn(
+                            "rounded-xl border px-3 py-2 text-[13px] font-bender-bold uppercase tracking-[0.08em] transition",
+                            !rightModelIsPreset
+                              ? "border-[#ffd166] bg-[#ffd166] text-[#23293a]"
+                              : "border-[#3a3f4b] bg-[#181c24] text-[#b6c2e2] hover:border-[#ffd166] hover:text-white",
+                          )}
+                          onClick={() =>
+                            changeTeamModel(
+                              "right",
+                              rightModelIsPreset
+                                ? ""
+                                : settings.rightTeamSettings.model,
+                            )
+                          }
+                        >
+                          Other
+                        </button>
                       </div>
-                      <input
-                        type="text"
-                        className="dashboard-input"
-                        value={settings.rightTeamSettings.model}
-                        onChange={(e) =>
-                          changeTeamModel("right", e.target.value)
-                        }
-                        style={{
-                          padding: "4px 8px",
-                          fontSize: 14,
-                          maxWidth: "100%",
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <div className="dashboard-label" style={{ fontSize: 13 }}>
-                        Logo
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                        }}
-                      >
+                      {!rightModelIsPreset && (
                         <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleLogoUpload("right", e)}
-                          className="dashboard-input"
-                          style={{
-                            padding: "4px 8px",
-                            fontSize: 14,
-                            maxWidth: "100%",
-                          }}
+                          type="text"
+                          className={dashboardInputClassName}
+                          value={settings.rightTeamSettings.model}
+                          onChange={(e) =>
+                            changeTeamModel("right", e.target.value)
+                          }
+                          placeholder="Helmet"
                         />
-                        {settings.rightTeamLogoUrl && (
-                          <>
-                            <span
-                              style={{
-                                fontSize: 12,
-                                color: "#b6c2e2",
-                                fontFamily: "monospace",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                                maxWidth: 80,
-                              }}
-                            >
-                              {settings.rightTeamLogoUrl.split("/").pop()}
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <label className={dashboardFieldLabelClassName}>
+                          Logo
+                        </label>
+                        <span className="text-[11px] text-[#b6c2e2]">
+                          Square image, max 256x256px
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                        <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-[#3a3f4b] bg-[#181c24]">
+                          {settings.rightTeamLogoUrl ? (
+                            <img
+                              src={settings.rightTeamLogoUrl}
+                              alt="Right team logo preview"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-center text-[11px] font-bender-bold uppercase tracking-[0.12em] text-[#7481a1]">
+                              No Logo
                             </span>
+                          )}
+                        </div>
+
+                        <div className="flex min-w-0 flex-1 flex-col gap-2">
+                          <input
+                            id="right-team-logo"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleLogoUpload("right", e)}
+                            className="hidden"
+                          />
+                          <label
+                            htmlFor="right-team-logo"
+                            className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-[#3a7bd5] px-4 py-3 text-center text-[13px] font-bender-bold uppercase tracking-[0.08em] text-white transition hover:bg-[#2851a3]"
+                          >
+                            Upload Logo
+                          </label>
+                          {settings.rightTeamLogoUrl && (
                             <button
+                              type="button"
                               onClick={() => removeLogo("right")}
-                              className="dashboard-action-btn small"
-                              style={{
-                                background: "#d32f2f",
-                                padding: "2px 6px",
-                              }}
+                              className="inline-flex w-fit items-center justify-center rounded-xl bg-[#d32f2f] px-3 py-2 text-[12px] font-bender-bold uppercase tracking-[0.08em] text-white transition hover:bg-[#b72828]"
                             >
-                              ✕
+                              Delete Logo
                             </button>
-                          </>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div> */}
+                </section>
+              </div>
             </Card>
 
             <Card title="Scoring">
