@@ -1,19 +1,20 @@
 import { produce } from "immer";
 import { screenNames, type ScreenName } from "~/schemas/screens";
+import type { Player, PlayerSource } from "~/schemas/settings";
 import { useAGOverlay } from "~/state/ag_overlay";
 import { useSettings } from "~/state/dashboard";
-import { useState, type JSX } from "react";
+import { useState } from "react";
 import SimpleBar from "simplebar-react";
 import "simplebar/dist/simplebar.min.css";
 import "./dashboard.css";
 import { ALPHA2_COUNTRY_LIST, getFlagUrl } from "~/utils/countries";
 import Card from "./components/Card";
+import steamUserAvatar from "./assets/steam_user.png";
 import {
   CaretDownIcon,
   FlagPennantIcon,
   HourglassIcon,
   ListIcon,
-  MapPinIcon,
   SwordIcon,
   TrophyIcon,
 } from "@phosphor-icons/react";
@@ -35,10 +36,44 @@ const dashboardInputClassName =
 const teamPanelClassName =
   "rounded-2xl border border-[#3a3f4b] bg-[#181c24]/45 p-4 md:p-5";
 
+type TeamSide = "left" | "right";
+
+type PlayerDraft = {
+  mode: PlayerSource;
+  steamInput: string;
+  steamID: string;
+  flagCode: string;
+  playerName: string;
+  avatarUrl: string;
+  resolving: boolean;
+  error: string;
+};
+
+function createPlayerDraft(mode: PlayerSource = "steam"): PlayerDraft {
+  return {
+    mode,
+    steamInput: mode === "no_steam" ? "NO_STEAM" : "",
+    steamID: mode === "no_steam" ? "NO_STEAM" : "",
+    flagCode: "",
+    playerName: "",
+    avatarUrl: mode === "no_steam" ? steamUserAvatar : "",
+    resolving: false,
+    error: "",
+  };
+}
+
 function isPresetTeamModel(model: string) {
   return teamModelPresets.includes(
     model.trim().toLowerCase() as (typeof teamModelPresets)[number],
   );
+}
+
+function getStoredPlayerAvatar(player: Player) {
+  if (player.source === "no_steam") {
+    return steamUserAvatar;
+  }
+
+  return player.avatarUrl || steamUserAvatar;
 }
 
 export function Dashboard() {
@@ -48,6 +83,8 @@ export function Dashboard() {
   const [selectedSection, setSelectedSection] = useState(
     sidebarItems[0]?.anchor ?? "",
   );
+  const [selectedPlayerTeamTab, setSelectedPlayerTeamTab] =
+    useState<TeamSide>("left");
 
   const setSelectedScreen = (screen: ScreenName) =>
     setSettings(
@@ -213,16 +250,12 @@ export function Dashboard() {
     );
   };
 
-  const [newLeftPlayer, setNewLeftPlayer] = useState({
-    steamID: "",
-    flagCode: "",
-    playerName: "",
-  });
-  const [newRightPlayer, setNewRightPlayer] = useState({
-    steamID: "",
-    flagCode: "",
-    playerName: "",
-  });
+  const [newLeftPlayer, setNewLeftPlayer] = useState<PlayerDraft>(() =>
+    createPlayerDraft(),
+  );
+  const [newRightPlayer, setNewRightPlayer] = useState<PlayerDraft>(() =>
+    createPlayerDraft(),
+  );
 
   const leftModelIsPreset = isPresetTeamModel(settings.leftTeamSettings.model);
   const rightModelIsPreset = isPresetTeamModel(
@@ -231,54 +264,134 @@ export function Dashboard() {
   const hasBackgroundMedia = settings.backgroundUrl.trim().length > 0;
   const backgroundIsVideo = /\.(webm|mp4)(\?|$)/i.test(settings.backgroundUrl);
 
-  const addLeftPlayer = () => {
-    if (
-      newLeftPlayer.steamID.trim() === "" ||
-      newLeftPlayer.playerName.trim() === ""
-    )
-      return;
-    setSettings(
-      produce((settings) => {
-        settings.leftTeamSettings.players.push({
-          steamID: newLeftPlayer.steamID,
-          flagCode: newLeftPlayer.flagCode || undefined,
-          playerName: newLeftPlayer.playerName,
-        });
-      }),
-    );
-    setNewLeftPlayer({ steamID: "", flagCode: "", playerName: "" });
+  const setPlayerDraft = (
+    side: TeamSide,
+    update: PlayerDraft | ((current: PlayerDraft) => PlayerDraft),
+  ) => {
+    const setter = side === "left" ? setNewLeftPlayer : setNewRightPlayer;
+    setter((current) => (typeof update === "function" ? update(current) : update));
   };
 
-  const addRightPlayer = () => {
-    if (
-      newRightPlayer.steamID.trim() === "" ||
-      newRightPlayer.playerName.trim() === ""
-    )
-      return;
-    setSettings(
-      produce((settings) => {
-        settings.rightTeamSettings.players.push({
-          steamID: newRightPlayer.steamID,
-          flagCode: newRightPlayer.flagCode || undefined,
-          playerName: newRightPlayer.playerName,
-        });
-      }),
-    );
-    setNewRightPlayer({ steamID: "", flagCode: "", playerName: "" });
+  const getPlayerDraft = (side: TeamSide) =>
+    side === "left" ? newLeftPlayer : newRightPlayer;
+
+  const setPlayerMode = (side: TeamSide, mode: PlayerSource) => {
+    setPlayerDraft(side, createPlayerDraft(mode));
   };
 
-  const removePlayer = (side: "left" | "right", steamID: string) => {
+  const resolveSteamPlayer = async (side: TeamSide) => {
+    const draft = getPlayerDraft(side);
+    const query = draft.steamInput.trim();
+
+    if (!query) {
+      setPlayerDraft(side, (current) => ({
+        ...current,
+        error: "Paste a Steam profile or ID first.",
+      }));
+      return;
+    }
+
+    setPlayerDraft(side, (current) => ({
+      ...current,
+      resolving: true,
+      error: "",
+    }));
+
+    try {
+      const res = await fetch(
+        `/api/steam-profile/resolve?q=${encodeURIComponent(query)}`,
+      );
+      const payload = (await res.json()) as
+        | {
+            steamID?: string;
+            playerName?: string;
+            avatarUrl?: string;
+            flagCode?: string;
+            error?: string;
+          }
+        | undefined;
+
+      if (!res.ok || !payload?.steamID || !payload.playerName) {
+        throw new Error(payload?.error || "Could not resolve Steam profile.");
+      }
+
+      setPlayerDraft(side, (current) => ({
+        ...current,
+        steamID: payload.steamID!,
+        playerName: payload.playerName!,
+        avatarUrl: payload.avatarUrl || steamUserAvatar,
+        flagCode: payload.flagCode || "",
+        resolving: false,
+        error: "",
+      }));
+    } catch (error) {
+      setPlayerDraft(side, (current) => ({
+        ...current,
+        steamID: "",
+        avatarUrl: "",
+        resolving: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Could not resolve Steam profile.",
+      }));
+    }
+  };
+
+  const addPlayer = (side: TeamSide) => {
+    const draft = getPlayerDraft(side);
+    const isSteam = draft.mode === "steam";
+
+    if (draft.playerName.trim() === "") {
+      setPlayerDraft(side, (current) => ({
+        ...current,
+        error: "Player name is required.",
+      }));
+      return;
+    }
+
+    if (isSteam && draft.steamID.trim() === "") {
+      setPlayerDraft(side, (current) => ({
+        ...current,
+        error: "Resolve the Steam player before adding it.",
+      }));
+      return;
+    }
+
+    const player: Player = {
+      id: crypto.randomUUID(),
+      source: draft.mode,
+      steamID: isSteam ? draft.steamID : "NO_STEAM",
+      flagCode: draft.flagCode || undefined,
+      playerName: draft.playerName.trim(),
+      avatarUrl: isSteam ? draft.avatarUrl : steamUserAvatar,
+    };
+
+    setSettings(
+      produce((settings) => {
+        const team =
+          side === "left"
+            ? settings.leftTeamSettings.players
+            : settings.rightTeamSettings.players;
+        team.push(player);
+      }),
+    );
+
+    setPlayerDraft(side, createPlayerDraft(draft.mode));
+  };
+
+  const removePlayer = (side: TeamSide, playerId: string) => {
     setSettings(
       produce((settings) => {
         if (side === "left") {
           settings.leftTeamSettings.players =
             settings.leftTeamSettings.players.filter(
-              (p) => p.steamID !== steamID,
+              (p) => p.id !== playerId,
             );
         } else {
           settings.rightTeamSettings.players =
             settings.rightTeamSettings.players.filter(
-              (p) => p.steamID !== steamID,
+              (p) => p.id !== playerId,
             );
         }
       }),
@@ -701,6 +814,337 @@ export function Dashboard() {
               </div>
             </Card>
 
+            <Card title="Players">
+              <p className="text-sm leading-6 text-[#b6c2e2] md:text-[15px]">
+                Resolve Steam players automatically or switch to No Steam mode
+                for manual entries with the default avatar.
+              </p>
+
+              <div className="grid grid-cols-2 gap-2 md:hidden">
+                {(
+                  [
+                    {
+                      side: "left",
+                      teamName: settings.leftTeamSettings.name,
+                    },
+                    {
+                      side: "right",
+                      teamName: settings.rightTeamSettings.name,
+                    },
+                  ] as const
+                ).map(({ side, teamName }) => (
+                  <button
+                    key={side}
+                    type="button"
+                    className={cn(
+                      "rounded-xl border px-3 py-3 text-[13px] font-bender-bold uppercase tracking-[0.08em] transition",
+                      selectedPlayerTeamTab === side
+                        ? "border-[#3a7bd5] bg-[#3a7bd5] text-white"
+                        : "border-[#3a3f4b] bg-[#181c24] text-[#b6c2e2]",
+                    )}
+                    onClick={() => setSelectedPlayerTeamTab(side)}
+                  >
+                    {teamName}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                {(
+                  [
+                    {
+                      side: "left",
+                      accent: "#5bc0eb",
+                      draft: newLeftPlayer,
+                      teamName: settings.leftTeamSettings.name,
+                      players: settings.leftTeamSettings.players,
+                    },
+                    {
+                      side: "right",
+                      accent: "#ff595e",
+                      draft: newRightPlayer,
+                      teamName: settings.rightTeamSettings.name,
+                      players: settings.rightTeamSettings.players,
+                    },
+                  ] as const
+                ).map(({ side, accent, draft, teamName, players }) => (
+                  <section
+                    key={side}
+                    className={cn(
+                      teamPanelClassName,
+                      side !== selectedPlayerTeamTab && "hidden md:block",
+                    )}
+                  >
+                    <div className="mb-4">
+                      <div
+                        className="text-lg font-bender-bold"
+                        style={{ color: accent }}
+                      >
+                        {teamName}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className={dashboardFieldLabelClassName}>
+                          Player Type
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            className={cn(
+                              "rounded-xl border px-3 py-2 text-[13px] font-bender-bold uppercase tracking-[0.08em] transition",
+                              draft.mode === "steam"
+                                ? "border-[#3a7bd5] bg-[#3a7bd5] text-white"
+                                : "border-[#3a3f4b] bg-[#181c24] text-[#b6c2e2] hover:border-[#3a7bd5] hover:text-white",
+                            )}
+                            onClick={() => setPlayerMode(side, "steam")}
+                          >
+                            Steam Player
+                          </button>
+                          <button
+                            type="button"
+                            className={cn(
+                              "rounded-xl border px-3 py-2 text-[13px] font-bender-bold uppercase tracking-[0.08em] transition",
+                              draft.mode === "no_steam"
+                                ? "border-[#ffd166] bg-[#ffd166] text-[#23293a]"
+                                : "border-[#3a3f4b] bg-[#181c24] text-[#b6c2e2] hover:border-[#ffd166] hover:text-white",
+                            )}
+                            onClick={() => setPlayerMode(side, "no_steam")}
+                          >
+                            No Steam
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="min-h-40 rounded-2xl border border-[#3a3f4b] bg-[#202635] p-3">
+                        {draft.mode === "steam" ? (
+                          <div>
+                            <label
+                              htmlFor={`${side}-steam-input`}
+                              className={dashboardFieldLabelClassName}
+                            >
+                              Steam Profile
+                            </label>
+                            <div className="flex flex-col gap-2 sm:flex-row">
+                              <input
+                                id={`${side}-steam-input`}
+                                type="text"
+                                className={dashboardInputClassName}
+                                placeholder="SteamID, SteamID64, vanity URL, or profile link"
+                                value={draft.steamInput}
+                                onChange={(e) =>
+                                  setPlayerDraft(side, (current) => ({
+                                    ...current,
+                                    steamInput: e.target.value,
+                                    steamID: "",
+                                    flagCode: "",
+                                    playerName: "",
+                                    avatarUrl: "",
+                                    error: "",
+                                  }))
+                                }
+                                onBlur={() => {
+                                  if (
+                                    draft.mode === "steam" &&
+                                    draft.steamInput.trim() &&
+                                    !draft.steamID &&
+                                    !draft.resolving
+                                  ) {
+                                    void resolveSteamPlayer(side);
+                                  }
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    void resolveSteamPlayer(side);
+                                  }
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => void resolveSteamPlayer(side)}
+                                disabled={draft.resolving}
+                                className={cn(
+                                  "inline-flex min-h-12 items-center justify-center rounded-xl px-4 py-2.5 text-[13px] font-bender-bold uppercase tracking-[0.08em] transition sm:min-w-32",
+                                  draft.resolving
+                                    ? "cursor-wait bg-[#2a3143] text-[#9aa6c3]"
+                                    : "bg-[#3a7bd5] text-white hover:bg-[#2851a3]",
+                                )}
+                              >
+                                {draft.resolving ? "Resolving..." : "Resolve"}
+                              </button>
+                            </div>
+                            <p className="mt-2 text-[12px] leading-5 text-[#b6c2e2]">
+                              Accepts SteamID, SteamID3, SteamID64, vanity
+                              names, and full Steam profile URLs.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex h-full flex-col justify-center text-[13px] leading-6 text-[#b6c2e2]">
+                            <div className="text-[11px] font-bender-bold uppercase tracking-[0.16em] text-[#ffd166]">
+                              Manual Entry
+                            </div>
+                            <p className="mt-2">
+                              Use this mode for non-Steam players. The entry
+                              will use the default local avatar and a
+                              `NO_STEAM` identifier.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="rounded-2xl border border-[#3a3f4b] bg-[#202635] p-3">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                          <div className="mx-auto flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-[#3a3f4b] bg-[#181c24] sm:mx-0">
+                            <img
+                              src={
+                                draft.mode === "no_steam"
+                                  ? steamUserAvatar
+                                  : draft.avatarUrl || steamUserAvatar
+                              }
+                              alt="Player avatar preview"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+
+                          <div className="flex min-w-0 flex-1 flex-col gap-4">
+                            <div>
+                              <label
+                                htmlFor={`${side}-player-name`}
+                                className={dashboardFieldLabelClassName}
+                              >
+                                Nick
+                              </label>
+                              <input
+                                id={`${side}-player-name`}
+                                type="text"
+                                className={dashboardInputClassName}
+                                placeholder="Player nickname"
+                                value={draft.playerName}
+                                onChange={(e) =>
+                                  setPlayerDraft(side, (current) => ({
+                                    ...current,
+                                    playerName: e.target.value,
+                                    error: "",
+                                  }))
+                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    addPlayer(side);
+                                  }
+                                }}
+                              />
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor={`${side}-player-flag`}
+                                className={dashboardFieldLabelClassName}
+                              >
+                                Flag
+                              </label>
+                              <select
+                                id={`${side}-player-flag`}
+                                className={dashboardInputClassName}
+                                value={draft.flagCode}
+                                onChange={(e) =>
+                                  setPlayerDraft(side, (current) => ({
+                                    ...current,
+                                    flagCode: e.target.value,
+                                  }))
+                                }
+                              >
+                                <option value="">No flag</option>
+                                {Object.entries(ALPHA2_COUNTRY_LIST).map(
+                                  ([code, name]) => (
+                                    <option key={code} value={code}>
+                                      {name}
+                                    </option>
+                                  ),
+                                )}
+                              </select>
+                              <p className="mt-2 text-[12px] leading-5 text-[#b6c2e2]">
+                                Steam players auto-fill this when possible. You
+                                can still change it manually.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {draft.error && (
+                        <div className="rounded-xl border border-[#d32f2f]/40 bg-[#d32f2f]/10 px-3 py-2 text-[12px] leading-5 text-[#ff8e8e]">
+                          {draft.error}
+                        </div>
+                      )}
+
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => addPlayer(side)}
+                          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#3a7bd5] px-4 py-2.5 text-[13px] font-bender-bold uppercase tracking-[0.08em] text-white transition hover:bg-[#2851a3]"
+                        >
+                          Add Player
+                        </button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {players.length === 0 ? (
+                          <div className="rounded-2xl border border-dashed border-[#3a3f4b] bg-[#181c24]/60 px-4 py-5 text-center text-[13px] text-[#7481a1]">
+                            No players added yet.
+                          </div>
+                        ) : (
+                          players.map((player) => (
+                            <div
+                              key={player.id}
+                              className="flex items-center gap-3 rounded-2xl border border-[#3a3f4b] bg-[#181c24]/70 px-3 py-3"
+                            >
+                              <img
+                                src={getStoredPlayerAvatar(player)}
+                                alt={player.playerName}
+                                className="h-12 w-12 shrink-0 rounded-xl object-cover"
+                              />
+
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="truncate text-[15px] text-white">
+                                    {player.playerName}
+                                  </span>
+                                  {player.flagCode && (
+                                    <img
+                                      src={getFlagUrl(player.flagCode)}
+                                      alt={player.flagCode}
+                                      className="h-4 w-5 shrink-0 rounded-[2px] object-cover"
+                                    />
+                                  )}
+                                </div>
+                                <div className="mt-1 text-[12px] text-[#9aa6c3]">
+                                  {player.source === "steam"
+                                    ? "Steam player"
+                                    : "No Steam player"}
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => removePlayer(side, player.id)}
+                                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d32f2f] text-[18px] font-bender-bold text-white transition hover:bg-[#b72828]"
+                                title="Remove player"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </section>
+                ))}
+              </div>
+            </Card>
+
             <Card title="Scoring">
               <div className="flex flex-col gap-3">
                 <p className="text-[13px] text-[#b6c2e2] md:text-sm">
@@ -1051,188 +1495,6 @@ export function Dashboard() {
                   ))}
                 </SimpleBar>
               </div>
-            </Card>
-
-            <Card title="Players">
-              {/* <div className="dashboard-card-content flex-wrap players-section">
-                <div className="team-players">
-                  <div className="dashboard-label" style={{ color: "#5bc0eb" }}>
-                    Left Side
-                  </div>
-                  <div className="add-player-row">
-                    <input
-                      type="text"
-                      className="dashboard-input"
-                      placeholder="SteamID"
-                      value={newLeftPlayer.steamID}
-                      onChange={(e) =>
-                        setNewLeftPlayer({
-                          ...newLeftPlayer,
-                          steamID: e.target.value,
-                        })
-                      }
-                    />
-                    <select
-                      className="dashboard-input"
-                      value={newLeftPlayer.flagCode}
-                      onChange={(e) =>
-                        setNewLeftPlayer({
-                          ...newLeftPlayer,
-                          flagCode: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="">No flag</option>
-                      {Object.entries(ALPHA2_COUNTRY_LIST).map(
-                        ([code, name]) => (
-                          <option key={code} value={code}>
-                            {name}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                    <input
-                      type="text"
-                      className="dashboard-input"
-                      placeholder="Player Name"
-                      value={newLeftPlayer.playerName}
-                      onChange={(e) =>
-                        setNewLeftPlayer({
-                          ...newLeftPlayer,
-                          playerName: e.target.value,
-                        })
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") addLeftPlayer();
-                      }}
-                    />
-                    <button
-                      className="dashboard-action-btn small"
-                      onClick={addLeftPlayer}
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <ul className="players-list">
-                    {settings.leftTeamSettings.players.map((p) => (
-                      <li key={p.steamID} className="player-item">
-                        <div className="player-info">
-                          {p.flagCode && (
-                            <img
-                              src={getFlagUrl(p.flagCode)}
-                              className="player-flag"
-                              width={22}
-                              height={16}
-                              alt={p.flagCode}
-                            />
-                          )}
-                          <span>
-                            {p.playerName}{" "}
-                            {p.flagCode
-                              ? `(${ALPHA2_COUNTRY_LIST[p.flagCode]})`
-                              : ""}{" "}
-                            [{p.steamID}]
-                          </span>
-                        </div>
-                        <button
-                          className="dashboard-action-btn small remove-btn"
-                          onClick={() => removePlayer("left", p.steamID)}
-                          title="Remove"
-                        >
-                          ×
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="team-players">
-                  <div className="dashboard-label" style={{ color: "#ff595e" }}>
-                    Right Side
-                  </div>
-                  <div className="add-player-row">
-                    <input
-                      type="text"
-                      className="dashboard-input"
-                      placeholder="SteamID"
-                      value={newRightPlayer.steamID}
-                      onChange={(e) =>
-                        setNewRightPlayer({
-                          ...newRightPlayer,
-                          steamID: e.target.value,
-                        })
-                      }
-                    />
-                    <select
-                      className="dashboard-input"
-                      value={newRightPlayer.flagCode}
-                      onChange={(e) =>
-                        setNewRightPlayer({
-                          ...newRightPlayer,
-                          flagCode: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="">No flag</option>
-                      {Object.entries(ALPHA2_COUNTRY_LIST).map(
-                        ([code, name]) => (
-                          <option key={code} value={code}>
-                            {name}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                    <input
-                      type="text"
-                      className="dashboard-input"
-                      placeholder="Player Name"
-                      value={newRightPlayer.playerName}
-                      onChange={(e) =>
-                        setNewRightPlayer({
-                          ...newRightPlayer,
-                          playerName: e.target.value,
-                        })
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") addRightPlayer();
-                      }}
-                    />
-                    <button
-                      className="dashboard-action-btn small"
-                      onClick={addRightPlayer}
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <ul className="players-list">
-                    {settings.rightTeamSettings.players.map((p) => (
-                      <li key={p.steamID} className="player-item">
-                        {p.flagCode && (
-                          <img
-                            src={getFlagUrl(p.flagCode)}
-                            className="player-flag"
-                            width={22}
-                            height={16}
-                          />
-                        )}
-                        <span>
-                          {p.playerName}{" "}
-                          {p.flagCode
-                            ? `(${ALPHA2_COUNTRY_LIST[p.flagCode]})`
-                            : ""}{" "}
-                          [{p.steamID}]
-                        </span>
-                        <button
-                          className="dashboard-action-btn small remove-btn"
-                          onClick={() => removePlayer("right", p.steamID)}
-                          title="Remove"
-                        >
-                          ×
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div> */}
             </Card>
           </>
         )}

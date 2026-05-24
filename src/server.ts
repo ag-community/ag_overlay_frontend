@@ -1,6 +1,7 @@
 import type { HTMLBundle } from "bun";
 import { mkdir } from "node:fs/promises";
 import { parseArgs } from "util";
+import { XMLParser } from "fast-xml-parser";
 import dashboard from "./dashboard/dashboard.html";
 import index from "./index.html";
 import {
@@ -8,9 +9,178 @@ import {
   type DashboardMessage,
 } from "./schemas/settings";
 import { isProduction } from "./util";
+import { ALPHA2_COUNTRY_LIST } from "./utils/countries";
 
 const BG_DIR = ".data/backgrounds";
 const LOGO_DIR = ".data/logos";
+const STEAM_ID64_BASE = 76561197960265728n;
+const steamXmlParser = new XMLParser();
+
+type ResolvedSteamProfile = {
+  steamID: string;
+  playerName: string;
+  avatarUrl: string;
+  flagCode?: string;
+  source: "steam";
+};
+
+function normalizeCountryName(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+const countryNameToCode = new Map(
+  Object.entries(ALPHA2_COUNTRY_LIST).map(([code, name]) => [
+    normalizeCountryName(name),
+    code,
+  ]),
+);
+
+function countryCodeFromText(value: string | undefined) {
+  if (!value) return undefined;
+  const normalizedValue = normalizeCountryName(value);
+  if (!normalizedValue) return undefined;
+
+  const direct = countryNameToCode.get(normalizedValue);
+  if (direct) return direct;
+
+  for (const [name, code] of countryNameToCode) {
+    if (
+      normalizedValue.includes(name) ||
+      name.includes(normalizedValue) ||
+      normalizedValue.endsWith(` ${name}`) ||
+      normalizedValue.startsWith(`${name} `)
+    ) {
+      return code;
+    }
+  }
+
+  return undefined;
+}
+
+function steamIdToSteam64(input: string) {
+  const match = input.trim().match(/^STEAM_[0-5]:([01]):(\d+)$/i);
+  if (!match) return null;
+  const y = BigInt(match[1]);
+  const z = BigInt(match[2]);
+  return (STEAM_ID64_BASE + z * 2n + y).toString();
+}
+
+function steamId3ToSteam64(input: string) {
+  const match = input.trim().match(/^\[?U:1:(\d+)\]?$/i);
+  if (!match) return null;
+  return (STEAM_ID64_BASE + BigInt(match[1])).toString();
+}
+
+function looksLikeSteam64(input: string) {
+  return /^\d{17}$/.test(input.trim());
+}
+
+function parseSteamInput(input: string) {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    const url = new URL(trimmed.startsWith("http") ? trimmed : `https://${trimmed}`);
+    if (url.hostname.includes("steamcommunity.com")) {
+      const parts = url.pathname.split("/").filter(Boolean);
+      if (parts[0] === "profiles" && parts[1]) {
+        return { kind: "steam64" as const, value: parts[1] };
+      }
+      if (parts[0] === "id" && parts[1]) {
+        return { kind: "vanity" as const, value: parts[1] };
+      }
+    }
+  } catch {}
+
+  const fromSteamId = steamIdToSteam64(trimmed);
+  if (fromSteamId) return { kind: "steam64" as const, value: fromSteamId };
+
+  const fromSteamId3 = steamId3ToSteam64(trimmed);
+  if (fromSteamId3) return { kind: "steam64" as const, value: fromSteamId3 };
+
+  if (looksLikeSteam64(trimmed)) {
+    return { kind: "steam64" as const, value: trimmed };
+  }
+
+  return { kind: "vanity" as const, value: trimmed.replace(/^\/+|\/+$/g, "") };
+}
+
+async function fetchSteamProfileXml(path: string) {
+  const res = await fetch(`https://steamcommunity.com/${path}?xml=1`);
+  if (!res.ok) {
+    throw new Error(`Steam XML lookup failed with ${res.status}`);
+  }
+  const text = await res.text();
+  const parsed = steamXmlParser.parse(text);
+  const profile = parsed?.profile;
+  if (!profile?.steamID64) {
+    throw new Error("Steam profile could not be resolved");
+  }
+  return profile as Record<string, string>;
+}
+
+async function fetchSteamCountryCode(path: string) {
+  const res = await fetch(`https://steamcommunity.com/${path}`);
+  if (!res.ok) return undefined;
+  const html = await res.text();
+
+  const countryCodeMatch = html.match(/"loccountrycode":"([A-Z]{2})"/);
+  if (countryCodeMatch?.[1]) {
+    return countryCodeMatch[1];
+  }
+
+  const stateMatch = html.match(/"location":"([^"]+)"/);
+  if (stateMatch?.[1]) {
+    return countryCodeFromText(stateMatch[1]);
+  }
+
+  return undefined;
+}
+
+async function resolveSteamProfile(rawInput: string): Promise<ResolvedSteamProfile> {
+  const parsedInput = parseSteamInput(rawInput);
+  if (!parsedInput) {
+    throw new Error("Missing Steam input");
+  }
+
+  const initialPath =
+    parsedInput.kind === "steam64"
+      ? `profiles/${parsedInput.value}`
+      : `id/${parsedInput.value}`;
+
+  const profile = await fetchSteamProfileXml(initialPath);
+  const steamID = String(profile.steamID64);
+  const playerName = String(profile.steamID ?? "").trim();
+  const avatarUrl = String(
+    profile.avatarFull || profile.avatarMedium || profile.avatarIcon || "",
+  ).trim();
+
+  if (!steamID || !playerName) {
+    throw new Error("Resolved Steam profile is missing required fields");
+  }
+
+  const canonicalPath = `profiles/${steamID}`;
+  const flagCode =
+    (await fetchSteamCountryCode(canonicalPath)) ||
+    countryCodeFromText(
+      String(profile.location || profile.locationCountryCode || "").trim(),
+    );
+
+  return {
+    steamID,
+    playerName,
+    avatarUrl,
+    flagCode,
+    source: "steam",
+  };
+}
 
 const args = parseArgs({
   args: process.argv,
@@ -82,6 +252,24 @@ async function run() {
         return new Response(res.body, {
           headers: { "content-type": "text/xml" },
         });
+      },
+      "/api/steam-profile/resolve": async (req) => {
+        const url = new URL(req.url);
+        const query = url.searchParams.get("q")?.trim();
+        if (!query) {
+          return Response.json({ error: "Missing query" }, { status: 400 });
+        }
+
+        try {
+          const profile = await resolveSteamProfile(query);
+          return Response.json(profile);
+        } catch (error) {
+          const message =
+            error instanceof Error
+              ? error.message
+              : "Failed to resolve Steam profile";
+          return Response.json({ error: message }, { status: 422 });
+        }
       },
       "/api/upload-background": async (req) => {
         if (req.method !== "POST") {

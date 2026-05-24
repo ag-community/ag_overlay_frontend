@@ -19,6 +19,8 @@ export function PlayerCard({ player, side }: Props) {
     staleTime: 10 * 60 * 1000,
   });
 
+  console.log("PlayerCard ", player.steamid);
+
   return (
     <div className={clsx("player-card", `player-card-${side}`)}>
       <div
