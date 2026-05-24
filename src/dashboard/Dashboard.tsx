@@ -11,12 +11,14 @@ import { ALPHA2_COUNTRY_LIST, getFlagUrl } from "~/utils/countries";
 import Card from "./components/Card";
 import steamUserAvatar from "./assets/steam_user.png";
 import {
+  BankIcon,
   CaretDownIcon,
   FlagPennantIcon,
   HourglassIcon,
   ListIcon,
   SwordIcon,
   TrophyIcon,
+  UserIcon,
 } from "@phosphor-icons/react";
 import { cn } from "~/dashboard/utils/ui";
 
@@ -269,7 +271,9 @@ export function Dashboard() {
     update: PlayerDraft | ((current: PlayerDraft) => PlayerDraft),
   ) => {
     const setter = side === "left" ? setNewLeftPlayer : setNewRightPlayer;
-    setter((current) => (typeof update === "function" ? update(current) : update));
+    setter((current) =>
+      typeof update === "function" ? update(current) : update,
+    );
   };
 
   const getPlayerDraft = (side: TeamSide) =>
@@ -385,33 +389,45 @@ export function Dashboard() {
       produce((settings) => {
         if (side === "left") {
           settings.leftTeamSettings.players =
-            settings.leftTeamSettings.players.filter(
-              (p) => p.id !== playerId,
-            );
+            settings.leftTeamSettings.players.filter((p) => p.id !== playerId);
         } else {
           settings.rightTeamSettings.players =
-            settings.rightTeamSettings.players.filter(
-              (p) => p.id !== playerId,
-            );
+            settings.rightTeamSettings.players.filter((p) => p.id !== playerId);
         }
       }),
     );
   };
 
   return (
-    <div className="dashboard-root">
-      <aside className="dashboard-sidebar">
-        {sidebarItems.map((item) => (
-          <button
-            key={item.anchor}
-            className={`sidebar-btn${selectedSection === item.anchor ? " active" : ""}`}
-            onClick={() => setSelectedSection(item.anchor)}
-          >
-            {item.label}
-          </button>
-        ))}
+    <div className="flex min-h-dvh flex-col bg-[#181c24] md:flex-row">
+      <aside className="relative overflow-x-auto border-b border-[#3a3f4b] bg-[#23293a] px-3 py-3 md:min-h-dvh md:w-[248px] md:shrink-0 md:border-b-0 md:border-r md:px-4 md:py-5">
+        <div className="flex min-w-max items-center gap-2 md:min-w-0 md:flex-col md:items-stretch">
+          <div className="hidden px-3 pb-3 md:block">
+            <div className="text-[11px] font-bender-bold uppercase tracking-[0.18em] text-[#b6c2e2]">
+              Dashboard
+            </div>
+            <div className="mt-1 text-[24px] font-bender-bold text-white">
+              Controls
+            </div>
+          </div>
+
+          {sidebarItems.map((item) => (
+            <button
+              key={item.anchor}
+              className={cn(
+                "inline-flex min-h-12 cursor-pointer items-center justify-center rounded-2xl border px-4 py-3 text-center text-[13px] font-bender-bold uppercase tracking-[0.08em] transition md:w-full md:justify-start md:text-left",
+                selectedSection === item.anchor
+                  ? "border-[#3a7bd5] bg-[#3a7bd5] text-white shadow-[0_10px_24px_rgba(58,123,213,0.22)]"
+                  : "border-[#3a3f4b] bg-[#181c24]/70 text-[#b6c2e2] hover:border-[#3a7bd5]/70 hover:bg-[#202d46] hover:text-white",
+              )}
+              onClick={() => setSelectedSection(item.anchor)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
       </aside>
-      <main className="dashboard-main">
+      <main className="flex flex-1 flex-col items-center gap-6 px-4 py-4 md:px-6 md:py-8">
         {selectedSection === "dashboard" && (
           <>
             <Card title="Scene Switcher">
@@ -987,8 +1003,8 @@ export function Dashboard() {
                             </div>
                             <p className="mt-2">
                               Use this mode for non-Steam players. The entry
-                              will use the default local avatar and a
-                              `NO_STEAM` identifier.
+                              will use the default local avatar and a `NO_STEAM`
+                              identifier.
                             </p>
                           </div>
                         )}
@@ -1475,25 +1491,80 @@ export function Dashboard() {
             </Card>
 
             <Card title="Server Selector">
-              <div className="dashboard-card-content flex-wrap">
-                <SimpleBar style={{ maxHeight: 240, width: "100%" }}>
-                  {AGOverlayData.map((server) => (
-                    <button
-                      key={server.server_ip}
-                      className={`dashboard-action-btn ${settings.selectedServer === server.server_ip ? "active" : ""}`}
-                      onClick={() =>
-                        setSettings(
-                          produce((settings) => {
-                            settings.selectedServer = server.server_ip;
-                          }),
-                        )
-                      }
-                    >
-                      {server.data.hostname} ({server.data.map}) -{" "}
-                      {server.data.players.length} players
-                    </button>
-                  ))}
-                </SimpleBar>
+              <div className="flex flex-col gap-4">
+                <p className="text-sm leading-6 text-[#b6c2e2] md:text-[15px]">
+                  Pick the live game server the overlay should follow.
+                </p>
+
+                <div className="rounded-2xl border border-[#3a3f4b] bg-[#181c24]/45 p-2 md:p-3">
+                  <SimpleBar style={{ maxHeight: 380, width: "100%" }}>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      {AGOverlayData.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-[#3a3f4b] bg-[#181c24]/60 px-4 py-6 text-center text-[13px] text-[#7481a1] md:col-span-2">
+                          No servers available yet. Check the AG websocket
+                          connection.
+                        </div>
+                      ) : (
+                        AGOverlayData.map((server) => {
+                          const isSelected =
+                            settings.selectedServer === server.server_ip;
+
+                          return (
+                            <button
+                              key={server.server_ip}
+                              type="button"
+                              className={cn(
+                                "w-full cursor-pointer rounded-2xl border px-4 py-4 text-left transition",
+                                isSelected
+                                  ? "border-[#3a7bd5] bg-[#3a7bd5]/18 shadow-[0_8px_24px_rgba(58,123,213,0.18)]"
+                                  : "border-[#3a3f4b] bg-[#202635] hover:border-[#3a7bd5]/60 hover:bg-[#202d46]",
+                              )}
+                              onClick={() =>
+                                setSettings(
+                                  produce((settings) => {
+                                    settings.selectedServer = server.server_ip;
+                                  }),
+                                )
+                              }
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0 flex-1">
+                                  <div className="truncate text-[15px] font-bender-bold text-white md:text-[16px]">
+                                    {server.data.hostname}
+                                  </div>
+                                  <div className="mt-2 flex flex-wrap gap-2">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3a3f4b] bg-[#181c24] px-2.5 py-1 text-[11px] font-bender-bold uppercase tracking-[0.08em] text-[#ffd166]">
+                                      <BankIcon size={12} weight="bold" />
+                                      {server.data.map}
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3a3f4b] bg-[#181c24] px-2.5 py-1 text-[11px] font-bender-bold uppercase tracking-[0.08em] text-[#b6c2e2]">
+                                      <UserIcon size={12} weight="bold" />
+                                      {server.data.players.length}
+                                    </span>
+                                  </div>
+                                  <div className="mt-3 truncate text-[12px] text-[#9aa6c3]">
+                                    {server.server_ip}
+                                  </div>
+                                </div>
+
+                                <div
+                                  className={cn(
+                                    "shrink-0 rounded-full px-3 py-1 text-[11px] font-bender-bold uppercase tracking-[0.12em]",
+                                    isSelected
+                                      ? "bg-[#ffd166] text-[#23293a]"
+                                      : "bg-[#181c24] text-[#b6c2e2]",
+                                  )}
+                                >
+                                  {isSelected ? "Selected" : "Choose"}
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </SimpleBar>
+                </div>
               </div>
             </Card>
           </>
@@ -1501,17 +1572,36 @@ export function Dashboard() {
 
         {selectedSection === "settings" && (
           <Card title="Connection Settings">
-            {/* <div className="dashboard-card-content">
-              <div>
-                <div className="dashboard-label">WebSocket URL</div>
+            <div className="flex flex-col gap-4">
+              <p className="text-sm leading-6 text-[#b6c2e2] md:text-[15px]">
+                This is the WebSocket URL for the AG backend service that
+                provides the live server data used by the overlay.
+              </p>
+
+              <div className="rounded-2xl border border-[#3a3f4b] bg-[#181c24]/45 p-4">
+                <label
+                  htmlFor="connection-websocket-url"
+                  className={dashboardFieldLabelClassName}
+                >
+                  WebSocket URL
+                </label>
                 <input
+                  id="connection-websocket-url"
                   type="text"
-                  className="dashboard-input"
+                  className={cn(
+                    dashboardInputClassName,
+                    "max-w-none text-[14px] md:text-[15px]",
+                  )}
+                  placeholder="ws://127.0.0.1:8080"
                   value={settings.websocketURL}
                   onChange={changeWebsocketURL}
                 />
+                <p className="mt-3 text-[12px] leading-5 text-[#b6c2e2] md:text-[13px]">
+                  Point this to the websocket service that exposes the AG match
+                  and player feed.
+                </p>
               </div>
-            </div> */}
+            </div>
           </Card>
         )}
       </main>
